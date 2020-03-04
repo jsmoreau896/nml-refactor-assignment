@@ -11,8 +11,7 @@
 class MyClass
 {
 
-    // Constants
-    // Required Roles for Functionality
+    // Constants: Required Roles for Functionality
     public static readonly string[] lstInteractionRequiredRoles = {POSRoles.LoansAndSurrender,
                                              POSRoles.VLSCOMM,
                                              POSRoles.CSR,
@@ -31,6 +30,7 @@ class MyClass
                                              POSRoles.LTC,
                                              POSRoles.FieldComp
                                             };
+
     public static readonly string[] lstCallerRequiredRoles = {POSRoles.LoansAndSurrender,
                                              POSRoles.VLSCOMM,
                                              POSRoles.CSR,
@@ -49,6 +49,7 @@ class MyClass
                                              POSRoles.LTC,
                                              POSRoles.FieldComp
                                             };
+
     public static readonly string[] lstCallerIntentRequiredRoles = {POSRoles.LoansAndSurrender,
                                              POSRoles.VLSCOMM,
                                              POSRoles.CSR,
@@ -65,6 +66,7 @@ class MyClass
                                              POSRoles.LTC,
                                              POSRoles.FieldComp
                                             };
+
     public static readonly string[] lstCallerNameRequiredRoles = {POSRoles.CSR,
                                              POSRoles.LTC,
                                              POSRoles.SHRC,
@@ -154,12 +156,13 @@ class MyClass
                 calllog.StartTime = DateTime.Now;
             }
 
-            // Update call log values
-            calllog.FRCRCNumber = getCallerControlListValue("cbFRA", true, ComboBox.clazz);  // TODO is this right with the class type 
+            // Populate the call log values
+            calllog.FRCRCNumber = getCallerControlListValue("cbFRA", true, ComboBox.clazz);
             calllog.FRCRCNumber = getCallerControlListValue("txtFRA", true, TextBox.clazz);  // TODO look into two FRCRCNumber.  Verify rules
             calllog.CallBackPhone = getCallerControlListValue("txtFRA", true, TextBox.clazz);
             calllog.SearchType = txtbxCallType.Text;
             calllog.SearchValue = txtbxCallDetails.Text;
+            calllog.Role = CommonConstants.SelectedRole.ToString();
 
             if (string.IsNullOrWhiteSpace(CommonConstants.GANumber.ToString()))
                 calllog.GANumber = getCallerControlListValue("txtno", true, TextBox.clazz);
@@ -167,134 +170,120 @@ class MyClass
                 calllog.GANumber = CommonConstants.GANumber;
 
 
-            // If selected role matches the required roles get and set the call log values
+            // If selected role matches the required list of roles then get and set the call log values
             if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstInteractionRequiredRoles))
             {
-                calllog.InteractionID = getValue(CommonConstants.interactionIDKey);
+                calllog.InteractionID = getValueWithNullCheck(CommonConstants.interactionIDKey);
             }
 
             if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstCallerRequiredRoles))
             {
-                calllog.CallerID = getValue(CommonConstants.callerID);
+                calllog.CallerID = getValueWithNullCheck(CommonConstants.callerID);
             }
 
             if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstCallerIntentRequiredRoles))
             {
-                calllog.CallerIntent = getValue(CommonConstants.CallerIntent);
+                calllog.CallerIntent = getValueWithNullCheck(CommonConstants.CallerIntent);
             }
 
-            calllog.Role = CommonConstants.SelectedRole.ToString();
 
-
-
+            // For each Caller Detail record create the list of CallerNames
+            // or single value CallerName
             for (int i = 0; i < grpCallerDetails.Controls.Count; i++)
             {
-                try
+                if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstCallerNameRequiredRoles))
                 {
-                    if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstCallerNameRequiredRoles))
+                    // Add items to lstcallerName array
+                    CheckBox chkBox = (CheckBox)grpCallerDetails.Controls[i];
+                    if (chkBox.Checked == true)
                     {
-                        // Add items to lstcallerName array
-                        CheckBox chkBox = (CheckBox)grpCallerDetails.Controls[i];
-                        if (chkBox.Checked == true)
+                        string ctrlname = "txt" + chkBox.Name.Substring(2);
+                        if (hasRecords(findCallerDetails(ctrlname, true)))
                         {
-                            string ctrlname = "txt" + chkBox.Name.Substring(2);
-                            if (hasRecords(findCallerDetails(ctrlname, true)))
-                            {
-                                lstcallerName.Add(getCallerControlListValue(ctrlname, true, TextBox.clazz));
-                            }
-                            else if (containsIgnoreCase(chkBox.Text, "assignee"))
-                            {
-                                lstcallerName.Add(getCallerControlListValue("cbAssignee", true, ComboBox.clazz));
-                            }
-                            else if (containsIgnoreCase(chkBox.Text, "fra"))
-                            {
-                                lstcallerName.Add(getCallerControlListValue("cbFRA", true, ComboBox.clazz));
-                            }
-                            else if (containsIgnoreCase(chkBox.Text, "fr"))
-                            {
-                                lstcallerName.Add(getCallerControlListValue("cbFR", true, ComboBox.clazz));
-                            }
+                            lstcallerName.Add(getCallerControlListValue(ctrlname, true, TextBox.clazz));
                         }
-                    }
-                    else
-                    {
-                        // Set CallerName field
-                        RadioButton rb = (RadioButton)grpCallerDetails.Controls[i];
-                        if (rb.Checked == true)
+                        else if (containsIgnoreCase(chkBox.Text, "assignee"))
                         {
-                            calllog.CallerType = rb.Text;
-                            string ctrlname = "txt" + rb.Name.Substring(2);
-                            if (hasRecords(findCallerDetails(ctrlname, true)))
-                            {
-                                calllog.CallerName = getCallerControlListValue(ctrlname, true, TextBox.clazz);
-                            }
-                            else if (containsIgnoreCase(rb.Text, "assignee"))
-                            {
-                                calllog.CallerName = getCallerControlListValue("cbAssignee", true, ComboBox.clazz);
-                            }
-                            else if (containsIgnoreCase(chkBox.Text, "fra"))
-                            {
-                                calllog.CallerName = getCallerControlListValue("cbFRA", true, ComboBox.clazz);
-                            }
-                            else if (containsIgnoreCase(chkBox.Text, "fr"))
-                            {
-                                calllog.CallerName = getCallerControlListValue("cbFR", true, ComboBox.clazz);
-                            }
-                            break;
+                            lstcallerName.Add(getCallerControlListValue("cbAssignee", true, ComboBox.clazz));
+                        }
+                        else if (containsIgnoreCase(chkBox.Text, "fra"))
+                        {
+                            lstcallerName.Add(getCallerControlListValue("cbFRA", true, ComboBox.clazz));
+                        }
+                        else if (containsIgnoreCase(chkBox.Text, "fr"))
+                        {
+                            lstcallerName.Add(getCallerControlListValue("cbFR", true, ComboBox.clazz));
                         }
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Logging.LogErrorMsg(this.Name, MethodInfo.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
+                    // Set CallerName field
+                    RadioButton rb = (RadioButton)grpCallerDetails.Controls[i];
+                    if (rb.Checked == true)
+                    {
+                        calllog.CallerType = rb.Text;
+                        string ctrlname = "txt" + rb.Name.Substring(2);
+                        if (hasRecords(findCallerDetails(ctrlname, true)))
+                        {
+                            calllog.CallerName = getCallerControlListValue(ctrlname, true, TextBox.clazz);
+                        }
+                        else if (containsIgnoreCase(rb.Text, "assignee"))
+                        {
+                            calllog.CallerName = getCallerControlListValue("cbAssignee", true, ComboBox.clazz);
+                        }
+                        else if (containsIgnoreCase(chkBox.Text, "fra"))
+                        {
+                            calllog.CallerName = getCallerControlListValue("cbFRA", true, ComboBox.clazz);
+                        }
+                        else if (containsIgnoreCase(chkBox.Text, "fr"))
+                        {
+                            calllog.CallerName = getCallerControlListValue("cbFR", true, ComboBox.clazz);
+                        }
+                        break;
+                    }
                 }
             }
+
 
             for (int i = 0; i < gbCalltype.Controls.Count; i++)
             {
-                try
+                CheckBox chkbox = (CheckBox)gbCalltype.Controls[i];
+                if (chkbox.Checked == true)
                 {
-                    CheckBox chkbox = (CheckBox)gbCalltype.Controls[i];
-                    if (chkbox.Checked == true)
+
+                    if (chkbox.Name.Contains("Specify"))
                     {
 
-                        if (chkbox.Name.Contains("Specify"))
+                        if (chkbox.Text.Contains("Transfer"))
                         {
-
-                            if (chkbox.Text.Contains("Transfer"))
+                            Control[] ctlList = findCallType("txtTransfer", true);
+                            if (ctlList.Length >= 1)
                             {
-                                Control[] ctlList = findCallType("txtTransfer", true);
-                                if (ctlList.Length >= 1)
-                                {
-                                    calllog.InternalTransfer = ((TextBox)ctlList[0]).Text;
-                                }
-                                if (isSkillAvailable)
-                                {
-                                    Control[] ctlList1 = findCallType("cmbSkill", true);
-                                    calllog.SkillSet = ((ComboBox)ctlList1[0]).Text;
-                                }
-                                if (isReasonCodeAvailable)
-                                {
-                                    Control[] ctlList1 = findCallType("cmbReason", true);
-                                    calllog.ReasonCode = ((ComboBox)ctlList1[0]).Text;
-                                }
-                                if (isInternalTransferAvailable)
-                                {
-                                    Control[] ctlList1 = findCallType("cmbInternalTransfer", true);
-                                    calllog.InternalTransfer = ((ComboBox)ctlList1[0]).Text;
-                                }
+                                calllog.InternalTransfer = ((TextBox)ctlList[0]).Text;
                             }
-                            else if (chkbox.Text.Contains("Other"))
+                            if (isSkillAvailable)
                             {
-                                Control[] ctlList = findCallType("txtOther", true);
-                                calllog.Others = ((TextBox)ctlList[0]).Text;
+                                Control[] ctlList1 = findCallType("cmbSkill", true);
+                                calllog.SkillSet = ((ComboBox)ctlList1[0]).Text;
+                            }
+                            if (isReasonCodeAvailable)
+                            {
+                                Control[] ctlList1 = findCallType("cmbReason", true);
+                                calllog.ReasonCode = ((ComboBox)ctlList1[0]).Text;
+                            }
+                            if (isInternalTransferAvailable)
+                            {
+                                Control[] ctlList1 = findCallType("cmbInternalTransfer", true);
+                                calllog.InternalTransfer = ((ComboBox)ctlList1[0]).Text;
                             }
                         }
+                        else if (chkbox.Text.Contains("Other"))
+                        {
+                            Control[] ctlList = findCallType("txtOther", true);
+                            calllog.Others = ((TextBox)ctlList[0]).Text;
+                        }
                     }
-                }
-                catch (Exception ex)
-                {
-                    Logging.LogErrorMsg(this.Name, MethodInfo.GetCurrentMethod().Name, ex.Message, ex.StackTrace);
                 }
             }
 
@@ -666,25 +655,15 @@ class MyClass
 
 
     /********************************************************************
-        Handle null values.  Return empty string if null.
+        Get Value based on Null Check. Return empty string if null.
         Returns: string
     *********************************************************************/
-    public string handleNulls(string value)
+    public string getValueWithNullCheck(string value)
     {
         if (!string.IsNullOrEmpty(value))
             return value;
         else
             return string.Empty;
-    }
-
-
-    /********************************************************************
-        Get Value based on Null Check  (TODO: This could go away)
-        Returns: string
-    *********************************************************************/
-    public string getValue(string value)
-    {
-        return handleNulls(value);
     }
 
 
@@ -702,6 +681,7 @@ class MyClass
                 return true;
             }
         }
+        return false;
     }
 
 }
