@@ -81,6 +81,15 @@ class MyClass
                                              POSRoles.NBCSR
                                             };
 
+    public static readonly string[] lstCallType2RequiredRoles = {POSRoles.CSR,
+                                             POSRoles.LTC,
+                                             POSRoles.NBCSR
+                                            };
+
+    public static readonly string[] lstCallType3or4RequiredRoles = {POSRoles.CSR,
+                                             POSRoles.NBCSR
+                                            };
+
 
     /********************************************************************
         Main Method
@@ -223,7 +232,7 @@ class MyClass
                     RadioButton rb = (RadioButton)grpCallerDetails.Controls[i];
                     if (rb.Checked == true)
                     {
-                        calllog.CallerType = rb.Text; 
+                        calllog.CallerType = rb.Text;
                         string ctrlname = "txt" + rb.Name.Substring(2);
                         if (hasRecords(findCallerDetails(ctrlname, true)))
                         {
@@ -274,99 +283,76 @@ class MyClass
                 }
             }
 
-
-
-            // CONTINUE HERE....................................
-
-
-
             string chklstBox1Item = string.Empty;
             if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstBox1ItemRequiredRoles))
             {
-                if (chklstBox1NBCSR.CheckedItems.Count > 0)
+                // Set chklstBox1Item 
+                if (hasRecords(chklstBox1NBCSR.CheckedItems))
                 {
                     string chkboxList1_Item = chklstBox1NBCSR.SelectedItem.ToString();
-
+                    // TODO Verify with requirements as this code seems strange
+                    // The chklstBox1Item is always going to be empty at this point because
+                    // we just set it to Empty above.
                     if (!string.IsNullOrEmpty(chklstBox1Item))
-                    {
                         chklstBox1Item = chklstBox1Item + "," + chkboxList1_Item;
-                    }
                     else
-                    {
                         chklstBox1Item = chkboxList1_Item;
-                    }
 
                 }
-                if (chklstBox2NBCSR.Visible == true)
+
+                // Set lstcallType or lstcallType2
+                if (chklstBox2NBCSR.Visible == true && hasRecords(chklstBox2NBCSR.CheckedItems))
                 {
-                    if (chklstBox2NBCSR.CheckedItems.Count > 0)
+                    string chkboxList2_Item = chklstBox2NBCSR.SelectedItem.ToString();
+                    if (!string.IsNullOrEmpty(chkboxList2_Item))
                     {
-                        string chkboxList2_Item = chklstBox2NBCSR.SelectedItem.ToString();
-                        if (!string.IsNullOrEmpty(chkboxList2_Item))
-                        {
-                            if (CommonConstants.SelectedRole == POSRoles.CSR || CommonConstants.SelectedRole == POSRoles.LTC
-                                || CommonConstants.SelectedRole == POSRoles.NBCSR)
-                            {
-                                lstcallType2.Add(chkboxList2_Item);
-                            }
-                            else
-                            {
-                                lstcallType.Add(chkboxList2_Item);
-                            }
-                        }
-                    }
-                }
-                if (chklstBox3NBCSR.Visible == true)
-                {
-                    if (chklstBox3NBCSR.CheckedItems.Count > 0)
-                    {
-                        string chkboxList3_Item = chklstBox3NBCSR.SelectedItem.ToString();
-                        if (CommonConstants.SelectedRole == POSRoles.CSR || CommonConstants.SelectedRole == POSRoles.NBCSR)
-                        {
-                            lstcallType3.Add(chkboxList3_Item);
-                        }
+                        if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstCallType2RequiredRoles))
+                            lstcallType2.Add(chkboxList2_Item);
                         else
-                        {
-                            lstcallType.Add(chkboxList3_Item);
-                        }
+                            lstcallType.Add(chkboxList2_Item);
                     }
                 }
 
-
-                if (chklstBox4NBCSR.Visible == true)
+                // Set lstcallType3
+                if (chklstBox3NBCSR.Visible == true && hasRecords(chklstBox3NBCSR.CheckedItems))
                 {
-                    if (chklstBox4NBCSR.CheckedItems.Count > 0)
+                    string chkboxList3_Item = chklstBox3NBCSR.SelectedItem.ToString();
+                    if (!string.IsNullOrEmpty(chkboxList3_Item))
                     {
-                        string chkboxList4_Item = chklstBox4NBCSR.SelectedItem.ToString();
-                        if (!string.IsNullOrEmpty(chkboxList4_Item))
-                        {
-                            if (CommonConstants.SelectedRole == POSRoles.CSR || CommonConstants.SelectedRole == POSRoles.NBCSR)
-                            {
-                                lstcallType4.Add(chkboxList4_Item);
-                            }
-                            else
-                            {
-                                lstcallType.Add(chkboxList4_Item);
-                            }
-                        }
+                        if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstCallType3or4RequiredRoles))
+                            lstcallType3.Add(chkboxList3_Item);
+                        else
+                            lstcallType.Add(chkboxList3_Item);
+                    }
+                }
+
+                // Set lstcallType4
+                if (chklstBox4NBCSR.Visible == true && hasRecords(chklstBox4NBCSR.CheckedItems))
+                {
+                    string chkboxList4_Item = chklstBox4NBCSR.SelectedItem.ToString();
+                    if (!string.IsNullOrEmpty(chkboxList4_Item))
+                    {
+                        if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstCallType3or4RequiredRoles))
+                            lstcallType4.Add(chkboxList4_Item);
+                        else
+                            lstcallType.Add(chkboxList4_Item);
                     }
                 }
             }
 
 
-
-
+            // Initialize values for setting of the next section
             string result = string.Empty;
             int index = 0;
             string result1 = string.Empty;
             string num = string.Empty;
             bool isNumberChanged = false;
 
-
             foreach (Control cn in gbCalltype.Controls)
             {
                 if (cn is ComboBox)
                 {
+                    // Initialize values for ComboBox
                     isNumberChanged = false;
                     string cmbBoxName = cn.Name;
                     string comboBoxNameWithNumber = string.Empty;
@@ -375,27 +361,44 @@ class MyClass
                     string number = string.Empty;
                     string callType = string.Empty;
                     string h = cmbBoxName.ElementAt(cmbBoxName.Length - 3).ToString();
+
+                    // Set Default Substring Search Indexes
+                    // Common Combo Box Name Default Indexes
+                    int commonCmbBoxNameStartIndex = 0;
+                    int commonCmbBoxNameEndIndex = cmbBoxName.Length - 2;
+
+                    // Combo Box Name with Number Default Indexes
+                    int comboBoxNameWithNumberStartIndex = 0;
+                    int comboBoxNameWithNumberEndIndex = cmbBoxName.Length - 1;
+
+                    // Number Default Indexes
+                    int numberStartIndex = cmbBoxName.Length - 1;
+
+                    // Call Type Default Indexes
+                    int callTypeStartIndex = 3;
+                    int callTypeEndIndex = cmbBoxName.Length - 5;
+
                     if (h.Any(char.IsDigit))
                     {
-                        commonCmbBoxName = cmbBoxName.Substring(0, cmbBoxName.Length - 3);
-                        comboBoxNameWithNumber = cmbBoxName.Substring(0, cmbBoxName.Length - 2);
-                        int index1 = cmbBoxName.IndexOf(commonCmbBoxName);
-                        cmbBoxNumber = comboBoxNameWithNumber.Substring(index1 + (commonCmbBoxName.Length));
-                        number = cmbBoxName.Substring(cmbBoxName.Length - 2);
-                        callType = cmbBoxName.Substring(3, cmbBoxName.Length - 6);
-                    }
-                    else
-                    {
-                        commonCmbBoxName = cmbBoxName.Substring(0, cmbBoxName.Length - 2);
-                        comboBoxNameWithNumber = cmbBoxName.Substring(0, cmbBoxName.Length - 1);
-                        int index1 = cmbBoxName.IndexOf(commonCmbBoxName);
-                        cmbBoxNumber = comboBoxNameWithNumber.Substring(index1 + (commonCmbBoxName.Length));
-                        number = cmbBoxName.Substring(cmbBoxName.Length - 1);
-                        callType = cmbBoxName.Substring(3, cmbBoxName.Length - 5);
+                        // Override the defaults if any character is a digit
+                        int commonCmbBoxNameStartIndex = 0;
+                        int commonCmbBoxNameEndIndex = cmbBoxName.Length - 3;
+                        int comboBoxNameWithNumberStartIndex = 0;
+                        int comboBoxNameWithNumberEndIndex = cmbBoxName.Length - 2;
+                        int numberStartIndex = cmbBoxName.Length - 2;
+                        int callTypeEndIndex = cmbBoxName.Length - 6;
                     }
 
+                    // Set values using substring and the indexes
+                    commonCmbBoxName = getSubstringValue(cmbBoxName, commonCmbBoxNameStartIndex, commonCmbBoxNameEndIndex);
+                    comboBoxNameWithNumber = getSubstringValue(cmbBoxName, comboBoxNameWithNumberStartIndex, comboBoxNameWithNumberEndIndex);
+                    number = getSubstringValue(cmbBoxName, numberStartIndex);
+                    callType = getSubstringValue(cmbBoxName, callTypeStartIndex, callTypeEndIndex);
 
+                    int index1 = cmbBoxName.IndexOf(commonCmbBoxName);
+                    cmbBoxNumber = getSubstringValue(comboBoxNameWithNumber, index1 + commonCmbBoxName.Length);
 
+                    // Set result1, lstcallType 1 to 4
                     if (!(containsIgnoreCase(cmbBoxName, "skill")
                             || containsIgnoreCase(cmbBoxName, "transfer")
                             || containsIgnoreCase(cmbBoxName, "reason")
@@ -424,29 +427,25 @@ class MyClass
                                     }
                                 }
                             }
-                            else if (comboBoxNameWithNumber.Contains("2") && cmbBoxNumber.Equals("2"))
+                            else
                             {
                                 if (cmb.SelectedItem != null)
                                 {
-                                    lstcallType2.Add(cmb.SelectedItem.ToString());
-                                }
-                            }
-                            else if (comboBoxNameWithNumber.Contains("3") && cmbBoxNumber.Equals("3"))
-                            {
-                                if (cmb.SelectedItem != null)
-                                {
-                                    lstcallType3.Add(cmb.SelectedItem.ToString());
-                                }
-                            }
-                            else if (comboBoxNameWithNumber.Contains("4") && cmbBoxNumber.Equals("4"))
-                            {
-                                if (cmb.SelectedItem != null)
-                                {
-                                    lstcallType4.Add(cmb.SelectedItem.ToString());
+                                    if (comboBoxNameWithNumber.Contains("2") && cmbBoxNumber.Equals("2"))
+                                    {
+                                        lstcallType2.Add(cmb.SelectedItem.ToString());
+                                    }
+                                    else if (comboBoxNameWithNumber.Contains("3") && cmbBoxNumber.Equals("3"))
+                                    {
+                                        lstcallType3.Add(cmb.SelectedItem.ToString());
+                                    }
+                                    else if (comboBoxNameWithNumber.Contains("4") && cmbBoxNumber.Equals("4"))
+                                    {
+                                        lstcallType4.Add(cmb.SelectedItem.ToString());
+                                    }
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -468,7 +467,7 @@ class MyClass
             calllog.CallType2 = buildValueForList(calllog.CallType2, lstcallType2);
             calllog.CallType3 = buildValueForList(calllog.CallType3, lstcallType3);
             calllog.CallType4 = buildValueForList(calllog.CallType4, lstcallType4);
-            calllog.AdditionalSearchNos = getAdditionalSearchNosValue(lbxAdditionalSearch); //TODO follow up on type
+            calllog.AdditionalSearchNos = getAdditionalSearchNosValue(lbxAdditionalSearch);
             calllog.CallNotes = txtbxNotes.Text;
             calllog.TransferFrom = string.Empty;
 
@@ -507,8 +506,6 @@ class MyClass
             throw new System.Exception("Exception in creating the CallLogUI object. ", ex);
         }
     }
-
-
 
 
     /********************************************************************
@@ -557,14 +554,11 @@ class MyClass
         if (!string.IsNullOrEmpty(resultStr))
         {
             if (!string.IsNullOrWhiteSpace(callTypeStr))
-            {
                 callTypeStr = callTypeStr + "," + resultStr;
-            }
             else
-            {
                 callTypeStr = resultStr;
-            }
         }
+        
         return callTypeStr;
     }
 
@@ -694,6 +688,30 @@ class MyClass
             return true;
         else
             return false;
+    }
+
+
+    /********************************************************************
+        Get substring from value with just a starting index reference
+        Note:  This may not add that much value wrapping but aids
+               in better visibility for this assignment
+        Returns: string
+    *********************************************************************/
+    public string getSubstringValue(string value, int startIndex)
+    {
+        return value.Substring(startIndex);
+    }
+
+
+    /********************************************************************
+        Get substring from value with a starting and ending index reference
+        Note:  This may not add that much value wrapping but aids
+               in better visibility for this assignment
+        Returns: string
+    *********************************************************************/
+    public string getSubstringValue(string value, int startIndex, int endIndex)
+    {
+        return value.Substring(startIndex, endIndex);
     }
 
 }
