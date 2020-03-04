@@ -415,16 +415,13 @@ class MyClass
                                 {
                                     lstcallType2.Add(cmb.SelectedItem.ToString());
                                 }
-                                else if (string.IsNullOrEmpty(callType) && cmb.SelectedItem != null)
+                                else if (string.IsNullOrEmpty(callType) && cmb.SelectedItem != null && !string.IsNullOrEmpty(result1))
                                 {
-                                    if (!string.IsNullOrEmpty(result1))
-                                    {
-                                        result1 = result1 + "," + cmb.SelectedItem.ToString();
-                                    }
-                                    else
-                                    {
-                                        result1 = cmb.SelectedItem.ToString();
-                                    }
+                                    result1 = result1 + "," + cmb.SelectedItem.ToString();
+                                }
+                                else if (string.IsNullOrEmpty(callType) && cmb.SelectedItem != null && string.IsNullOrEmpty(result1))
+                                {
+                                    result1 = cmb.SelectedItem.ToString();
                                 }
                             }
                             else
@@ -558,7 +555,7 @@ class MyClass
             else
                 callTypeStr = resultStr;
         }
-        
+
         return callTypeStr;
     }
 
