@@ -157,9 +157,9 @@ class MyClass
             }
 
             // Populate the call log values
-            calllog.FRCRCNumber = getCallerControlListValue("cbFRA", true, ComboBox.clazz);
-            calllog.FRCRCNumber = getCallerControlListValue("txtFRA", true, TextBox.clazz);  // TODO look into two FRCRCNumber.  Verify rules
-            calllog.CallBackPhone = getCallerControlListValue("txtFRA", true, TextBox.clazz);
+            calllog.FRCRCNumber = getCallerDetailsControlListValue("cbFRA", true, ComboBox.clazz);
+            calllog.FRCRCNumber = getCallerDetailsControlListValue("txtFRA", true, TextBox.clazz);  // TODO look into two FRCRCNumber.  Verify rules
+            calllog.CallBackPhone = getCallerDetailsControlListValue("txtFRA", true, TextBox.clazz);
             calllog.SearchType = txtbxCallType.Text;
             calllog.SearchValue = txtbxCallDetails.Text;
             calllog.Role = CommonConstants.SelectedRole.ToString();
@@ -200,19 +200,19 @@ class MyClass
                         string ctrlname = "txt" + chkBox.Name.Substring(2);
                         if (hasRecords(findCallerDetails(ctrlname, true)))
                         {
-                            lstcallerName.Add(getCallerControlListValue(ctrlname, true, TextBox.clazz));
+                            lstcallerName.Add(getCallerDetailsControlListValue(ctrlname, true, TextBox.clazz));
                         }
                         else if (containsIgnoreCase(chkBox.Text, "assignee"))
                         {
-                            lstcallerName.Add(getCallerControlListValue("cbAssignee", true, ComboBox.clazz));
+                            lstcallerName.Add(getCallerDetailsControlListValue("cbAssignee", true, ComboBox.clazz));
                         }
                         else if (containsIgnoreCase(chkBox.Text, "fra"))
                         {
-                            lstcallerName.Add(getCallerControlListValue("cbFRA", true, ComboBox.clazz));
+                            lstcallerName.Add(getCallerDetailsControlListValue("cbFRA", true, ComboBox.clazz));
                         }
                         else if (containsIgnoreCase(chkBox.Text, "fr"))
                         {
-                            lstcallerName.Add(getCallerControlListValue("cbFR", true, ComboBox.clazz));
+                            lstcallerName.Add(getCallerDetailsControlListValue("cbFR", true, ComboBox.clazz));
                         }
                     }
                 }
@@ -222,23 +222,23 @@ class MyClass
                     RadioButton rb = (RadioButton)grpCallerDetails.Controls[i];
                     if (rb.Checked == true)
                     {
-                        calllog.CallerType = rb.Text;
+                        calllog.CallerType = rb.Text; //TODO Review as this is being set above
                         string ctrlname = "txt" + rb.Name.Substring(2);
                         if (hasRecords(findCallerDetails(ctrlname, true)))
                         {
-                            calllog.CallerName = getCallerControlListValue(ctrlname, true, TextBox.clazz);
+                            calllog.CallerName = getCallerDetailsControlListValue(ctrlname, true, TextBox.clazz);
                         }
                         else if (containsIgnoreCase(rb.Text, "assignee"))
                         {
-                            calllog.CallerName = getCallerControlListValue("cbAssignee", true, ComboBox.clazz);
+                            calllog.CallerName = getCallerDetailsControlListValue("cbAssignee", true, ComboBox.clazz);
                         }
                         else if (containsIgnoreCase(chkBox.Text, "fra"))
                         {
-                            calllog.CallerName = getCallerControlListValue("cbFRA", true, ComboBox.clazz);
+                            calllog.CallerName = getCallerDetailsControlListValue("cbFRA", true, ComboBox.clazz);
                         }
                         else if (containsIgnoreCase(chkBox.Text, "fr"))
                         {
-                            calllog.CallerName = getCallerControlListValue("cbFR", true, ComboBox.clazz);
+                            calllog.CallerName = getCallerDetailsControlListValue("cbFR", true, ComboBox.clazz);
                         }
                         break;
                     }
@@ -246,43 +246,29 @@ class MyClass
             }
 
 
+            // Loop through the Call Type array and set values
             for (int i = 0; i < gbCalltype.Controls.Count; i++)
             {
                 CheckBox chkbox = (CheckBox)gbCalltype.Controls[i];
-                if (chkbox.Checked == true)
+                if (chkbox.Checked == true && chkbox.Name.Contains("Specify"))
                 {
-
-                    if (chkbox.Name.Contains("Specify"))
+                    if (chkbox.Text.Contains("Transfer"))
                     {
+                        if (isSkillAvailable)
+                            calllog.SkillSet = getCallerTypeControlListValue("cmbSkill", true, ComboBox);
 
-                        if (chkbox.Text.Contains("Transfer"))
-                        {
-                            Control[] ctlList = findCallType("txtTransfer", true);
-                            if (ctlList.Length >= 1)
-                            {
-                                calllog.InternalTransfer = ((TextBox)ctlList[0]).Text;
-                            }
-                            if (isSkillAvailable)
-                            {
-                                Control[] ctlList1 = findCallType("cmbSkill", true);
-                                calllog.SkillSet = ((ComboBox)ctlList1[0]).Text;
-                            }
-                            if (isReasonCodeAvailable)
-                            {
-                                Control[] ctlList1 = findCallType("cmbReason", true);
-                                calllog.ReasonCode = ((ComboBox)ctlList1[0]).Text;
-                            }
-                            if (isInternalTransferAvailable)
-                            {
-                                Control[] ctlList1 = findCallType("cmbInternalTransfer", true);
-                                calllog.InternalTransfer = ((ComboBox)ctlList1[0]).Text;
-                            }
-                        }
-                        else if (chkbox.Text.Contains("Other"))
-                        {
-                            Control[] ctlList = findCallType("txtOther", true);
-                            calllog.Others = ((TextBox)ctlList[0]).Text;
-                        }
+                        if (isReasonCodeAvailable)
+                            calllog.ReasonCode = getCallerTypeControlListValue("cmbReason", true, ComboBox);
+
+                        if (isInternalTransferAvailable)
+                            calllog.InternalTransfer = getCallerTypeControlListValue("cmbInternalTransfer", true, ComboBox);
+                        else
+                            calllog.InternalTransfer = getCallerTypeControlListValue("txtTransfer", true, TextBox);
+
+                    }
+                    else if (chkbox.Text.Contains("Other"))
+                    {
+                        calllog.Others = getCallerTypeControlListValue("txtOther", true, TextBox);
                     }
                 }
             }
@@ -486,7 +472,7 @@ class MyClass
             // Set Related Reference if role is of CSR
             if (CommonConstants.SelectedRole == POSRoles.CSR)
             {
-                calllog.RelatedRef = varRelatedRef;
+                calllog.RelatedRef = varRelatedRef; //TODO Find out where this comes from
             }
 
             // If CallType is null
@@ -630,6 +616,7 @@ class MyClass
             return false;
     }
 
+
     /********************************************************************
         String Contains to handle case
         Returns: boolean
@@ -644,7 +631,7 @@ class MyClass
         Get value for a given Caller Details Control List
         Returns: string
     *********************************************************************/
-    public string getCallerControlListValue(string controlName, bool indicator, Type clazz)
+    public string getCallerDetailsControlListValue(string controlName, bool indicator, Type clazz)
     {
         Control[] controlList = findCallerDetails(controlName, indicator);
         if (hasRecords(controlList))
@@ -652,6 +639,21 @@ class MyClass
         else
             return string.Empty;
     }
+
+
+    /********************************************************************
+        Get value for a given Caller Details Control List
+        Returns: string
+    *********************************************************************/
+    public string getCallerTypeControlListValue(string controlName, bool indicator, Type clazz)
+    {
+        Control[] controlList = findCallType(controlName, indicator);
+        if (hasRecords(controlList))   // TODO Verify if .Count is the same as .Length
+            return ((clazz)controlList[0]).Text;
+        else
+            return string.Empty;
+    }
+
 
 
     /********************************************************************
