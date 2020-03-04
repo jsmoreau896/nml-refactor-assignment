@@ -1,7 +1,7 @@
 # Refactoring Process Notes
 
-##Disclaimer:  Just my chicken scratching of notes.
-##Assignment by: Jeff Moreau
+## Disclaimer:  Just my chicken scratching of notes.
+## Assignment by: Jeff Moreau
 
 1.	I opened the assignment and studied the screen shots, code, and instructions.   I first noticed it’s not written in Java.  It appeared to be C# so I went and confirmed that.
 2.	C# and Java are very close, but I reviewed an online tutorial to brush up on syntax as I never worked with C# before. 
