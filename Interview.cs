@@ -171,6 +171,7 @@ class MyClass
             calllog.ClosingQues = buildValueForList(calllog.ClosingQues, lstclosingQues);
 
 
+            // If GANumber is null/blank then search for value otherwise use what's there
             if (string.IsNullOrWhiteSpace(CommonConstants.GANumber.ToString()))
                 calllog.GANumber = getCallerControlListValue("txtno", true, TextBox.clazz);
             else
@@ -218,11 +219,11 @@ class MyClass
                 }
                 else
                 {
-                    // Set CallerName field
+                    // Else set the CallerName field if Caller Details are not required for role
                     RadioButton rb = (RadioButton)grpCallerDetails.Controls[i];
                     if (rb.Checked == true)
                     {
-                        calllog.CallerType = rb.Text; //TODO Review as this is being set above
+                        calllog.CallerType = rb.Text; 
                         string ctrlname = "txt" + rb.Name.Substring(2);
                         if (hasRecords(findCallerDetails(ctrlname, true)))
                         {
@@ -413,7 +414,6 @@ class MyClass
                                 }
                                 else if (string.IsNullOrEmpty(callType) && cmb.SelectedItem != null)
                                 {
-                                    //lstcallType1.Add(cmb.SelectedItem.ToString());
                                     if (!string.IsNullOrEmpty(result1))
                                     {
                                         result1 = result1 + "," + cmb.SelectedItem.ToString();
@@ -452,6 +452,7 @@ class MyClass
             }
 
             // Added for CSR or NBCSR call type removal
+            // TODO: Verify if this has to be located here or can be rolled up in logic earlier
             if ((CommonConstants.SelectedRole == POSRoles.CSR || CommonConstants.SelectedRole == POSRoles.NBCSR)
                 && lstcallType.Count == 0)
             {
@@ -471,11 +472,11 @@ class MyClass
             calllog.CallNotes = txtbxNotes.Text;
             calllog.TransferFrom = string.Empty;
 
+
             // Set Related Reference if role is of CSR
             if (CommonConstants.SelectedRole == POSRoles.CSR)
-            {
                 calllog.RelatedRef = varRelatedRef; //TODO Find out where this comes from
-            }
+
 
             // If CallType is null
             if (calllog.CallType == null)
@@ -543,7 +544,6 @@ class MyClass
             else
                 callTypeStr = str;
         }
-
         return callTypeStr;
     }
 
@@ -565,7 +565,6 @@ class MyClass
                 callTypeStr = resultStr;
             }
         }
-
         return callTypeStr;
     }
 
@@ -580,13 +579,9 @@ class MyClass
         for (int i = 0; i <= lbxAdditionalSearch.Items.Count - 1; i++)
         {
             if (stradd != string.Empty)
-            {
                 stradd = stradd + "," + lbxAdditionalSearch.Items[i].ToString();
-            }
             else
-            {
                 stradd = lbxAdditionalSearch.Items[i].ToString();
-            }
         }
         return stradd;
     }
@@ -700,6 +695,5 @@ class MyClass
         else
             return false;
     }
-
 
 }
