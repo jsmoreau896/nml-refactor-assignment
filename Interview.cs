@@ -74,6 +74,13 @@ class MyClass
                                             };
 
 
+    public static readonly string[] lstBox1ItemRequiredRoles = {POSRoles.Distribution,
+                                             POSRoles.ADM,
+                                             POSRoles.CSR,
+                                             POSRoles.LTC,
+                                             POSRoles.NBCSR
+                                            };
+
 
     /********************************************************************
         Main Method
@@ -102,10 +109,8 @@ class MyClass
 
             // If this call notes are for a general question, no caller selected
             // or call back is selected, then flip isGQorNoCaller to true
-            if (isGeneralQuestion || isNoCallerSelected || isCallBackSelected)
-            {
+            if (IsGeneralQuestOrNoCallerOrCallBack())
                 isGQorNoCaller = true;
-            }
 
             // Create the CallLogUI object
             CallLogUI calllog = createCallLogUI();
@@ -151,10 +156,9 @@ class MyClass
             CallLogUI calllog = new CallLogUI();
 
             // Set start time for a General Question, No Caller Selected, or Call Back was selected
-            if (isGeneralQuestion || isNoCallerSelected || isCallBackSelected)
-            {
+            if (IsGeneralQuestOrNoCallerOrCallBack())
                 calllog.StartTime = DateTime.Now;
-            }
+
 
             // Populate the call log values
             calllog.FRCRCNumber = getCallerDetailsControlListValue("cbFRA", true, ComboBox.clazz);
@@ -163,6 +167,9 @@ class MyClass
             calllog.SearchType = txtbxCallType.Text;
             calllog.SearchValue = txtbxCallDetails.Text;
             calllog.Role = CommonConstants.SelectedRole.ToString();
+            calllog.Qualifier = buildValueForList(calllog.Qualifier, lstQualifier);
+            calllog.ClosingQues = buildValueForList(calllog.ClosingQues, lstclosingQues);
+
 
             if (string.IsNullOrWhiteSpace(CommonConstants.GANumber.ToString()))
                 calllog.GANumber = getCallerControlListValue("txtno", true, TextBox.clazz);
@@ -172,23 +179,16 @@ class MyClass
 
             // If selected role matches the required list of roles then get and set the call log values
             if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstInteractionRequiredRoles))
-            {
                 calllog.InteractionID = getValueWithNullCheck(CommonConstants.interactionIDKey);
-            }
 
             if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstCallerRequiredRoles))
-            {
                 calllog.CallerID = getValueWithNullCheck(CommonConstants.callerID);
-            }
 
             if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstCallerIntentRequiredRoles))
-            {
                 calllog.CallerIntent = getValueWithNullCheck(CommonConstants.CallerIntent);
-            }
 
 
-            // For each Caller Detail record create the list of CallerNames
-            // or single value CallerName
+            // For each Caller Detail record create the list of CallerNames or single value CallerName
             for (int i = 0; i < grpCallerDetails.Controls.Count; i++)
             {
                 if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstCallerNameRequiredRoles))
@@ -274,10 +274,13 @@ class MyClass
             }
 
 
+
+            // CONTINUE HERE....................................
+
+
+
             string chklstBox1Item = string.Empty;
-            if (CommonConstants.SelectedRole == POSRoles.Distribution || CommonConstants.SelectedRole == POSRoles.ADM
-                || CommonConstants.SelectedRole == POSRoles.CSR
-                || CommonConstants.SelectedRole == POSRoles.LTC || CommonConstants.SelectedRole == POSRoles.NBCSR)         //nancy
+            if (isRequiredForSelectedRole(CommonConstants.SelectedRole, lstBox1ItemRequiredRoles))
             {
                 if (chklstBox1NBCSR.CheckedItems.Count > 0)
                 {
@@ -349,8 +352,7 @@ class MyClass
                 }
             }
 
-            calllog.Qualifier = buildValueForList(calllog.Qualifier, lstQualifier);
-            calllog.ClosingQues = buildValueForList(calllog.ClosingQues, lstclosingQues);
+
 
 
             string result = string.Empty;
@@ -685,5 +687,19 @@ class MyClass
         }
         return false;
     }
+
+    /********************************************************************
+        Is this for a General Question, No Caller Selected, or
+        Call Back Selected?
+        Returns: boolean
+    *********************************************************************/
+    public bool IsGeneralQuestOrNoCallerOrCallBack()
+    {
+        if (isGeneralQuestion || isNoCallerSelected || isCallBackSelected)
+            return true;
+        else
+            return false;
+    }
+
 
 }
